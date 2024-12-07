@@ -1,9 +1,6 @@
 import React from "react";
-import boy from "./image/boy.jpeg";
-import girl from "./image/girl.jpeg";
 import Header from "./Header";
 import Nav from "./Nav";
-import Card from "./Card";
 
 function Home() {
   return (
@@ -17,14 +14,6 @@ function Home() {
           </h1>
           <div className="flex items-center justify-center h-15 p-3">
             <h1 className="text-2xl">Score: 100</h1>
-          </div>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Card imgSrc={boy} buttonText="Add Task" altText="Add Task Image" />
-            <Card
-              imgSrc={girl}
-              buttonText="View Pending"
-              altText="View Pending Image"
-            />
           </div>
         </main>
       </div>
