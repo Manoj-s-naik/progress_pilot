@@ -3,15 +3,47 @@
 @tailwind components;
 @tailwind utilities;
 
-
 /* Reset CSS */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+}
+
+.spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgb(253, 253, 253);
+  border-radius: 50%;
+  border-top: 4.5px solid #191b1b;
+  animation: loader 500ms linear infinite;
+}
+
+@media (max-width: 768px) {
+  .spinner {
+    width: 30px;
+    height: 30px;
+    border-width: 3px;
   }
-  
-  body {
-    font-family: Arial, sans-serif; 
+}
+@media (min-width: 1024px) {
+  .spinner {
+    width: 60px;
+    height: 60px;
+    border-width: 5px;
   }
-  
+}
+
+@keyframes loader {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
