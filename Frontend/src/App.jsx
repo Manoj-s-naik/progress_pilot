@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
 import Login from "./components/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Loading from "./components/Loading";
 
 
@@ -8,11 +9,10 @@ import Loading from "./components/Loading";
 function App() {
   return (
     <>
-      {/* <Home /> */}
-      <Routes>
-        
-        <Route path="/" element={<Home />}></Route>
-        <Route path="/login" element={<Loading />}></Route>
+      <Routes> 
+        <Route path="/" element={<ProtectedRoute> <Home></Home> </ProtectedRoute>}></Route>
+        <Route path="/login" element={<Login />}></Route>
+        <Route path="/loading" element={<Loading />}></Route>
       </Routes>
     </>
   );
