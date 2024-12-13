@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import logo from "./image/logo.jpeg";
 import { CircleUserRound } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
+import { useAuth } from "./AuthContext";
 function Header() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
+  const { login, loginHandler, logoutHandler } = useAuth();
   const profilePopUpHandler = () => {
     setIsSidebarOpen((prevState) => !prevState);
   };
@@ -15,6 +16,7 @@ function Header() {
         <div className="w-[7rem] flex items-center">
           <img src={logo} alt="logo" className="rounded-full" />
         </div>
+
         <div className="ml-auto pr-4">
           <CircleUserRound
             onClick={profilePopUpHandler}
@@ -50,7 +52,10 @@ function Header() {
                 <h4>Manoj s naik</h4>
                 <div>To be became unreplaceable</div>
                 <h3>Score :100%</h3>
-                <button className="bg-blue-600 p-2 w-[6rem] rounded-lg">
+                <button
+                  onClick={logoutHandler}
+                  className="bg-blue-600 p-2 w-[6rem] rounded-lg"
+                >
                   Logout
                 </button>
               </div>

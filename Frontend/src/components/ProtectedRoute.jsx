@@ -3,10 +3,9 @@ import { useAuth } from "./AuthContext";
 
 function ProtectedRoute({ children }) {
   const { login } = useAuth();
-  console.log("Is user logged in? ", login);
+  console.log("login state in protected route", login);
 
-  // Redirect based on login state
-  if (login == false) {
+  if (!login) {
     return <Navigate to="/login" />;
   }
 
