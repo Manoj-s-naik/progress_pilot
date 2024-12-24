@@ -34,12 +34,12 @@ mongoose
 
 const signupHandler = async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, lastName } = req.body;
 
-    if (!email || !password || !name) {
+    if (!email || !password || !name || !lastName) {
       return res.status(400).json({
         status: "failure",
-        message: "Name, email, and password are required",
+        message: "Name, email,lastName and password are required",
       });
     }
 
@@ -59,6 +59,7 @@ const signupHandler = async (req, res) => {
       password: hashedPassword,
       name,
       confirmPassword: hashedPassword,
+      lastName,
     });
 
     return res.status(201).json({
@@ -68,6 +69,7 @@ const signupHandler = async (req, res) => {
         id: newUser._id,
         email: newUser.email,
         name: newUser.name,
+        lastName: newUser.lastName,
       },
     });
   } catch (err) {
@@ -112,6 +114,7 @@ const loginHandler = async (req, res) => {
     res.cookie("jwt", authToken, {
       maxAge: 1000 * 60 * 60 * 24,
       httpOnly: true,
+      sameSite: "strict",
     });
     return res.status(200).json({
       message: "success fully generate the jwt token",
@@ -143,6 +146,7 @@ const protectedRouteMiddleware = async (req, res, next) => {
     );
     // token identifier
     req.id = dycryptedToken.id;
+
     next();
   } catch (err) {
     return res.status(500).json({
@@ -174,7 +178,7 @@ const profileHandler = async (req, res) => {
   }
 };
 
-const logoutHandler = async (req,res) => {
+const logoutHandler = async (req, res) => {
   try {
     res.clearCookie("jwt", { path: "/" });
     res.json({
@@ -184,7 +188,7 @@ const logoutHandler = async (req,res) => {
   } catch (error) {
     res.status(500).json({
       message: "internal error",
-      error : error.message
+      error: error.message,
     });
   }
 };
