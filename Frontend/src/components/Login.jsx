@@ -50,6 +50,11 @@ function Login() {
           >
             Login
           </button>
+
+          <div className="flex gap-[5rem] mt-3">
+            <a href="/signup">signup</a>
+            <a href="/forgetPassowrd">forget password</a>
+          </div>
         </form>
       </div>
     </div>
