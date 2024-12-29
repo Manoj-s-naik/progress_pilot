@@ -10,10 +10,6 @@ function AuthWrapper({ children }) {
   const [login, setLogin] = useState(false);
 
   const loginHandler = async (email, password) => {
-    // const dummyLoginCredintial = {
-    //   email: "naik47236@gamil.com",
-    //   password: "7676manoj",
-    // };
     try {
       const response = await fetch("http://localhost:3000/login", {
         method: "POST",
@@ -22,10 +18,10 @@ function AuthWrapper({ children }) {
         },
         body: JSON.stringify({ email, password }),
       });
-
       const data = await response.json();
-      setLogin(true);
-      console.log("data", data);
+      if (response.ok) {
+        setLogin(true);
+      }
     } catch (err) {
       console.log(err.message);
     }
@@ -37,14 +33,13 @@ function AuthWrapper({ children }) {
         method: "POST",
       });
       const data = response.json();
-      console.log("data in logout", data);
-
       setLogin(false);
     } catch (err) {
       console.log(err.message);
     }
   };
 
+  
   return (
     <AuthContext.Provider value={{ login, loginHandler, logoutHandler }}>
       {children}

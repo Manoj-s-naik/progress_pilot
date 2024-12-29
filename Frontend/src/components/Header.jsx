@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { useAuth } from "./AuthContext";
 function Header() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { login, loginHandler, logoutHandler } = useAuth();
+  const { logoutHandler } = useAuth();
   const profilePopUpHandler = () => {
     setIsSidebarOpen((prevState) => !prevState);
   };

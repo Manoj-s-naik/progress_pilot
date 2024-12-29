@@ -11,11 +11,12 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>}></Route>
+        {/* <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>}></Route>
         <Route path="/login" element={<Login />}></Route>
         <Route path="/loading" element={<Loading />}></Route>
         <Route path="/signup" element={<Signup />}></Route>
-        <Route path="/forgetPassowrd" element={<ForgetPassword />}></Route>
+        <Route path="/forgetPassowrd" element={<ForgetPassword />}></Route> */}
+        <Route path="/" element={<Home />}></Route>  this is for checking 
       </Routes>
     </>
   );
