@@ -8,7 +8,7 @@ export function useAuth() {
 
 function AuthWrapper({ children }) {
   const [login, setLogin] = useState(false);
-
+  const [progressScore, setprogressScore] = useState(100);
   const loginHandler = async (email, password) => {
     try {
       const response = await fetch("http://localhost:3000/login", {
@@ -41,7 +41,7 @@ function AuthWrapper({ children }) {
 
   
   return (
-    <AuthContext.Provider value={{ login, loginHandler, logoutHandler }}>
+    <AuthContext.Provider value={{ login, loginHandler,progressScore,setprogressScore, logoutHandler }}>
       {children}
     </AuthContext.Provider>
   );

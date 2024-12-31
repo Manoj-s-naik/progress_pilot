@@ -1,12 +1,21 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 function Nav() {
   return (
-    <nav className="w-[9rem] bg-gray-700 flex flex-col justify-evenly items-center">
-      <div className="text-white">Dashboard</div>
-      <div className="text-white">Add Task</div>
-      <div className="text-white">Pending Task</div>
-      <div className="text-white">Completed Task</div>
+    <nav className="w-[9rem] bg-gray-700 flex flex-col justify-evenly items-center h-full">
+      <Link to="/" className="text-white">
+        Dashboard
+      </Link>
+      <Link to="/addTask" className="text-white">
+        Add Task
+      </Link>
+      <Link to="/pendingTask" className="text-white">
+        Pending Task
+      </Link>
+      <Link to="/completedTask" className="text-white">
+        Completed Task
+      </Link>
     </nav>
   );
 }

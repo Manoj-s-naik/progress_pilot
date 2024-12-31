@@ -1,17 +1,13 @@
 import React, { useState } from "react";
+import { useAuth } from "./AuthContext";
 
 function Dashboard() {
-  const [value, setvalue] = useState(50);
+  const { progressScore, setprogressScore } = useAuth();
+
   const handleRangeChange = (e) => {
-    setvalue(Number(e.target.value));
-  };
-  const showToastCompletion = () => {
-    alert("your course completed");
+    setprogressScore(Number(e.target.value));
   };
 
-  if (value == 100) {
-    showToastCompletion();
-  }
   return (
     <>
       <div className="sm:h-[300px] sm:w-[300px] lg:h-[400px] lg:w-[400px]  border-[2px] shadow-lg">
@@ -25,14 +21,14 @@ function Dashboard() {
             className="w-full"
             min="0"
             max="100"
-            value={value}
+            value={progressScore}
             onChange={handleRangeChange}
             type="range"
             name=""
             id=""
           />
         </div>
-        <p className="text-center">{value}% Completed</p>
+        <p className="text-center lg:text-lg">{progressScore}% Completed</p>
       </div>
     </>
   );
