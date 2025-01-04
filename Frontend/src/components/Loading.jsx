@@ -3,7 +3,7 @@ import "../main.css";
 function Loading() {
   return (
     <>
-      <div className="flex items-center justify-center h-screen w-screen">
+      <div className="flex justify-center items-center h-[calc(100vh-7rem)]">
         <div className="spinner "></div>
       </div>
     </>

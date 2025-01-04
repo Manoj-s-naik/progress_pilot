@@ -15,9 +15,6 @@ function Home() {
         <div className="flex-1 relative">
           <Main />
         </div>
-        {/* <div className="">
-          <Main />
-        </div> */}
       </div>
     </div>
   );
