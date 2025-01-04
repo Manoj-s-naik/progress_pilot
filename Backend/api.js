@@ -10,6 +10,7 @@ const jwt = require("jsonwebtoken");
 const promisdiedJWTsign = promisify(jwt.sign);
 const promisdiedJWTverify = promisify(jwt.verify);
 const userModel = require("./models/userModel");
+const taskModel = require("./models/taskModel");
 
 dotenv.config({ path: "./.env" });
 const app = express();
@@ -193,11 +194,66 @@ const logoutHandler = async (req, res) => {
   }
 };
 
+const createTaskHandler = async (req, res) => {
+  try {
+    const taskDetails = req.body;
+    if (!taskDetails || !taskDetails.taskName) {
+      return res.status(400).json({
+        message: "Task details or task name is required",
+        status: "failure",
+      });
+    }
+
+    const task = await taskModel.create(taskDetails);
+    return res.status(201).json({
+      message: "Task created successfully",
+      status: "success",
+      task: task,
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Internal server error",
+      error: err.message,
+    });
+  }
+};
+
+
+const getTasksHandler = async (req, res) => {
+  try {
+    const { status } = req.query;
+    console.log("Received status:", status); // Log the status
+    const filter = status ? { status } : {};
+    console.log("Filter being used:", filter); // Log the filter
+
+    const tasks = await taskModel.find(filter);
+    console.log("Tasks retrieved:", tasks); // Log retrieved tasks
+    res.status(200).json({
+      message: "Tasks retrieved successfully",
+      status: "success",
+      tasks,
+    });
+  } catch (err) {
+    console.error("Error in getTasksHandler:", err); // Log error details
+    res.status(500).json({
+      message: "Internal server error",
+      error: err.message,
+    });
+  }
+};
+
+
+// Public routes
+
 app.post("/sign", signupHandler);
 app.post("/login", loginHandler);
 app.get("/profile", protectedRouteMiddleware, profileHandler);
 app.post("/logout", logoutHandler);
 
+// Task routes
+app.post("/task", createTaskHandler);
+app.get("/tasks", getTasksHandler);
 // Start the server
 const port = process.env.PORT || 3001;
 
