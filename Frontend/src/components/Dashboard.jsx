@@ -11,7 +11,7 @@ function Dashboard() {
   return (
     <>
       <div className="flex h-full  items-center justify-center">
-        <div className="sm:h-[300px] sm:w-[300px] lg:h-[400px] lg:w-[400px]  border-[2px] shadow-lg">
+        <div className="sm:h-[300px] sm:w-[300px] lg:h-[400px] lg:w-[400px]  border-[2px] shadow-lg ">
           <img
             src="src\components\image\logo2.jpg"
             alt="boy image"

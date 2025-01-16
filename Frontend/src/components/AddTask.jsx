@@ -1,98 +1,86 @@
 import React, { useState, useEffect } from "react";
 import Loading from "./Loading";
+import { UseTask } from "./TaskContext";
 
 function AddTask() {
+  const { loading, setLoading, task, setTask, tasks, fetchTasks } = UseTask();
   const [inputValue, setInputValue] = useState("");
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/tasks");
-        if (response.ok) {
-          const data = await response.json();
-          setTasks(data.tasks);
-        } else {
-          const error = await response.json();
-          alert(error.message);
-        }
-      } catch (err) {
-        console.error("Error fetching tasks:", err.message);
-      } finally {
-        setLoading(false); 
-      }
-    };
-
-    fetchTasks();
-  }, []);
 
   const addTaskHandler = async () => {
-    if (!inputValue.trim()) {
-      alert("Please enter a task");
+    if (inputValue.trim().length === 0) {
+      alert("Task cannot be empty");
       return;
     }
 
-    try {
-      const response = await fetch("http://localhost:3000/task", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ taskName: inputValue }),
-      });
+    const response = await fetch("http://localhost:3000/task", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ taskName: inputValue }),
+    });
 
-      if (response.ok) {
-        const data = await response.json();
-        setTasks([...tasks, data.task]);
-        setInputValue("");
-      } else {
-        const error = await response.json();
-        alert(error.message);
-      }
-    } catch (err) {
-      console.error("Error adding task:", err.message);
-      alert("Failed to add task");
+    if (response.ok) {
+      setLoading(true);
+      const data = await response.json();
+      console.log("data from add task", data);
+
+      setTask(inputValue);
+      setInputValue("");
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
   return (
-    <div>
+    <>
+      <div className=" flex justify-center items-center gap-5  ml-8">
+        <input
+          type="text"
+          value={inputValue}
+          onChange={(e) => {
+            setInputValue(e.target.value);
+          }}
+          placeholder="Enter a task"
+          className="text-center focus:outline-none border-b-2 w-[400px] h-[4rem]"
+        />
+        <button
+          className="bg-gray-800 rounded-lg p-4 text-white"
+          onClick={addTaskHandler}
+        >
+          Add Task
+        </button>
+      </div>
+
       {loading ? (
         <Loading />
-      ) : ( 
-        <>
-          <div className="flex justify-center gap-6 pt-[5rem]">
-            <input
-              type="text"
-              onChange={(e) => setInputValue(e.target.value)}
-              value={inputValue}
-              placeholder="Add your task here"
-              className="w-[19rem] border-b-2 border-gray-700 text-center focus:outline-none"
-            />
-            <button
-              className="bg-gray-700 p-2 rounded-lg text-white"
-              onClick={addTaskHandler}
-            >
-              Add Task
-            </button>
-          </div>
-          <div className="pt-7">
-            {tasks.length > 0 ? (
-              <ol className="list-decimal">
-                {tasks.map((task) => (
-                  <li key={task._id} className="text-gray-800 ml-[4rem]">
-                    {task.taskName}
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="text-center text-gray-500">No tasks added yet!</p>
-            )}
-          </div>
-        </>
+      ) : (
+        <div className="pt-4">
+          {tasks.length > 0 ? (
+            <ul className="">
+              {tasks.map((task) => (
+                <li
+                  key={task._id}
+                  className="flex justify-between items-center text-gray-800 ml-[1rem] w-[550px] px-4 py-2"
+                >
+                  <span>{task.taskName}</span>
+                  <p className=" px-2 py-1 rounded">
+                    {new Date(task.createdAt).toLocaleString()}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="flex items-center justify-center h-[563px]">
+              No tasks available!
+            </p>
+          )}
+        </div>
       )}
-    </div>
+    </>
   );
 }
 
