@@ -8,6 +8,7 @@ export function useAuth() {
 
 function AuthWrapper({ children }) {
   const [login, setLogin] = useState(false);
+
   const [progressScore, setprogressScore] = useState(100);
   const loginHandler = async (email, password) => {
     try {
@@ -38,6 +39,7 @@ function AuthWrapper({ children }) {
       console.log(err.message);
     }
   };
+
 
   
   return (
