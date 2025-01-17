@@ -210,7 +210,6 @@ const createTaskHandler = async (req, res) => {
       status: "success",
       task: task,
     });
-
   } catch (err) {
     res.status(500).json({
       message: "Internal server error",
@@ -219,30 +218,109 @@ const createTaskHandler = async (req, res) => {
   }
 };
 
-
-const getTasksHandler = async (req, res) => {
+const viewAllTaskHandler = async (req, res) => {
   try {
-    const { status } = req.query;
-    console.log("Received status:", status); // Log the status
-    const filter = status ? { status } : {};
-    console.log("Filter being used:", filter); // Log the filter
-
-    const tasks = await taskModel.find(filter);
-    console.log("Tasks retrieved:", tasks); // Log retrieved tasks
-    res.status(200).json({
-      message: "Tasks retrieved successfully",
+    const allTask = await taskModel.find();
+    return res.status(200).json({
+      allTask: allTask,
       status: "success",
-      tasks,
     });
-  } catch (err) {
-    console.error("Error in getTasksHandler:", err); // Log error details
+  } catch (error) {
     res.status(500).json({
       message: "Internal server error",
-      error: err.message,
+      error: error.message,
     });
   }
 };
 
+const deleteAllTaskHandler = async (req, res) => {
+  try {
+    const deleteAllTasks = await taskModel.deleteMany();
+    return res.status(200).json({
+      message: "all tasks deleted successfully",
+      status: "success",
+      "deleted tasks": deleteAllTasks,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+const updatePendingHandler = async (req, res) => {
+  const { id } = req.params; // ID of the task to be updated
+  const { status } = req.body; // New status to update
+
+  // Validate the status value
+  if (!["pending", "completed"].includes(status)) {
+    return res.status(400).json({ message: "Invalid status value" });
+  }
+
+  // Validate the provided task ID
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid task ID format" });
+  }
+
+  try {
+    // Update the task's status in the database
+    const updatedTask = await taskModel.findByIdAndUpdate(
+      id,
+      { $set: { status } }, // Update status to the new value
+      { new: true } // Return the updated task
+    );
+
+    if (!updatedTask) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Task status updated successfully", updatedTask });
+  } catch (error) {
+    console.error("Error updating task:", error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+};
+
+// 6789223e6e30cc3837e7a2cf
+
+const viewTaskWithId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Check if the provided ID is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid task ID format",
+      });
+    }
+
+    // Find the task by ID
+    const task = await taskModel.findById(id);
+
+    // Check if the task exists
+    if (!task) {
+      return res.status(404).json({
+        message: "Task not found",
+      });
+    }
+
+    // Return the task data
+    return res.status(200).json({
+      task: task,
+      status: "success",
+    });
+  } catch (error) {
+    // Handle unexpected errors
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
 
 // Public routes
 
@@ -253,10 +331,18 @@ app.post("/logout", logoutHandler);
 
 // Task routes
 app.post("/task", createTaskHandler);
-app.get("/tasks", getTasksHandler);
-// Start the server
-const port = process.env.PORT || 3001;
+app.get("/tasks", viewAllTaskHandler);
+app.delete("/tasks", deleteAllTaskHandler);
+app.put("/tasks/:id/status", updatePendingHandler);
+app.get("/tasks/:id", viewTaskWithId);
 
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+// Start the server
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, (err) => {
+  if (err) {
+    console.error(`Error occurred: ${err.message}`);
+  } else {
+    console.log(`Server is running on port ${PORT}`);
+  }
 });
