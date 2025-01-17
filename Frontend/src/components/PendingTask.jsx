@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Loading from "./Loading";
+import { UseTask } from "./TaskContext";
 
 function PendingTask() {
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [tasks, setTasks] = useState("");
+  const { fetchTasks, loading, setLoading } = UseTask();
 
   const updatePendingHandler = () => {
     alert("clicked");
