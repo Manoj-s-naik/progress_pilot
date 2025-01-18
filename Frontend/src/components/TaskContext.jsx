@@ -15,11 +15,13 @@ function TaskWrapper({ children }) {
     setLoading(true);
     const response = await fetch("http://localhost:3000/tasks");
     const data = await response.json();
-
+    console.log("data from taskcontext",data);
+    
     if (data.status === "success") {
       setTasks(data.allTask);
     }
     setLoading(false);
+    return data;
   };
 
   return (
