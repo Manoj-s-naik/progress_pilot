@@ -330,6 +330,23 @@ const fetchCompletedStatusHandler = async (req, res) => {
     });
   }
 };
+const fetchPendingStatusHandler = async (req, res) => {
+  try {
+    const completedTask = await taskModel.find({ status: "pending" });
+
+    return res.status(201).json({
+      message: "pending tasks fetch successfully",
+      status: "success",
+      tasks: completedTask,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal error",
+      status: "failure",
+      error: error.message,
+    });
+  }
+};
 
 // Public routes
 
@@ -344,6 +361,7 @@ app.get("/tasks", viewAllTaskHandler);
 app.delete("/tasks", deleteAllTaskHandler);
 app.put("/tasks/:id/status", updateStatusHandler);
 app.get("/tasks/completed", fetchCompletedStatusHandler);
+app.get("/tasks/pending", fetchPendingStatusHandler);
 app.get("/tasks/:id", viewTaskWithId);
 
 // Start the server
