@@ -8,6 +8,7 @@ import completeSign from "./image/completSign.jpeg";
 function PendingTask() {
   const [tasks, setTasks] = useState([]);
   const { fetchTasks, loading, setLoading } = UseTask();
+  const [image,setImage]=useState(pendingSign);
 
   const fetchPendingTasksHandler = async () => {
     setLoading(true);
@@ -42,7 +43,9 @@ function PendingTask() {
           prevTasks.map((task) =>
             task._id === taskId ? { ...task, status } : task
           )
-        );
+        )
+        setImage("");
+        ;
       } else {
         alert(data.message);
       }
@@ -77,8 +80,7 @@ function PendingTask() {
                   </Link>
                   <div className="flex gap-4 ml-auto mr-5">
                     <img
-                      src={pendingSign}
-                      alt="Pending"
+                      src={image}
                       className="h-[1rem] cursor-pointer"
                       onClick={() => updateTaskStatus(task._id, "pending")}
                     />
