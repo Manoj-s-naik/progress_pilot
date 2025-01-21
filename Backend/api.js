@@ -249,26 +249,23 @@ const deleteAllTaskHandler = async (req, res) => {
   }
 };
 
-const updatePendingHandler = async (req, res) => {
-  const { id } = req.params; // ID of the task to be updated
-  const { status } = req.body; // New status to update
+const updateStatusHandler = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
 
-  // Validate the status value
   if (!["pending", "completed"].includes(status)) {
     return res.status(400).json({ message: "Invalid status value" });
   }
 
-  // Validate the provided task ID
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({ message: "Invalid task ID format" });
   }
 
   try {
-    // Update the task's status in the database
     const updatedTask = await taskModel.findByIdAndUpdate(
       id,
-      { $set: { status } }, // Update status to the new value
-      { new: true } // Return the updated task
+      { $set: { status } },
+      { new: true }
     );
 
     if (!updatedTask) {
@@ -286,37 +283,49 @@ const updatePendingHandler = async (req, res) => {
   }
 };
 
-// 6789223e6e30cc3837e7a2cf
-
 const viewTaskWithId = async (req, res) => {
+  //task._id : 6789223e6e30cc3837e7a2cf
   try {
     const { id } = req.params;
-    // Check if the provided ID is a valid ObjectId
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         message: "Invalid task ID format",
       });
     }
 
-    // Find the task by ID
     const task = await taskModel.findById(id);
 
-    // Check if the task exists
     if (!task) {
       return res.status(404).json({
         message: "Task not found",
       });
     }
-
-    // Return the task data
     return res.status(200).json({
       task: task,
       status: "success",
     });
   } catch (error) {
-    // Handle unexpected errors
     return res.status(500).json({
       message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+const fetchCompletedStatusHandler = async (req, res) => {
+  try {
+    const completedTask = await taskModel.find({ status: "completed" });
+
+    return res.status(201).json({
+      message: "completed tasks",
+      status: "success",
+      tasks: completedTask,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal error",
+      status: "failure",
       error: error.message,
     });
   }
@@ -333,7 +342,8 @@ app.post("/logout", logoutHandler);
 app.post("/task", createTaskHandler);
 app.get("/tasks", viewAllTaskHandler);
 app.delete("/tasks", deleteAllTaskHandler);
-app.put("/tasks/:id/status", updatePendingHandler);
+app.put("/tasks/:id/status", updateStatusHandler);
+app.get("/tasks/completed", fetchCompletedStatusHandler);
 app.get("/tasks/:id", viewTaskWithId);
 
 // Start the server
