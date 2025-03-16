@@ -135,24 +135,24 @@ const protectedRouteMiddleware = async (req, res, next) => {
   try {
     const token = req.cookies.jwt;
     if (!token) {
-      return res.status(400).json({
-        message: "token is not there unauthorize access",
+      return res.status(401).json({
+        message: "Unauthorized access: Token missing",
         status: "failure",
       });
     }
-    // varify the token after call the next
-    const dycryptedToken = await promisdiedJWTverify(
-      token,
-      process.env.JWT_SECRET_KEY
-    );
-    // token identifier
-    req.id = dycryptedToken.id;
+
+    // Verify the token
+    const decryptedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+
+    // Attach user ID to request object
+    req.id = decryptedToken.id;
+    console.log("userid", req.id);
 
     next();
   } catch (err) {
     return res.status(500).json({
-      message: "internal error",
-      error: err,
+      message: "Internal server error",
+      error: err.message,
     });
   }
 };
@@ -196,19 +196,21 @@ const logoutHandler = async (req, res) => {
 
 const createTaskHandler = async (req, res) => {
   try {
-    const taskDetails = req.body;
-    if (!taskDetails || !taskDetails.taskName) {
+    const userId = req.id;
+    const { taskName } = req.body;
+    if (!taskName) {
       return res.status(400).json({
         message: "Task details or task name is required",
         status: "failure",
       });
     }
 
-    const task = await taskModel.create(taskDetails);
+    const task = await taskModel.create({ taskName, userId });
     return res.status(201).json({
       message: "Task created successfully",
       status: "success",
       task: task,
+      userid: userId,
     });
   } catch (err) {
     res.status(500).json({
@@ -217,6 +219,35 @@ const createTaskHandler = async (req, res) => {
     });
   }
 };
+
+const getLoggedinUserTasks = async (req, res) => {
+  try {
+    const loggedInUserId = req.id;
+
+    if (!loggedInUserId) {
+      return res.status(401).json({
+        message: "Authentication required",
+        status: "failure",
+      });
+    }
+
+    // Fetch all tasks for the logged-in user
+    const loggedInUserTasks = await taskModel.find({ userId: loggedInUserId });
+
+    res.status(200).json({
+      message: "Tasks retrieved successfully",
+      status: "success",
+      tasks: loggedInUserTasks,
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Internal server error",
+      error: err.message,
+    });
+  }
+};
+
 
 const viewAllTaskHandler = async (req, res) => {
   try {
@@ -356,13 +387,15 @@ app.get("/profile", protectedRouteMiddleware, profileHandler);
 app.post("/logout", logoutHandler);
 
 // Task routes
-app.post("/task", createTaskHandler);
+app.post("/task", protectedRouteMiddleware, createTaskHandler);
 app.get("/tasks", viewAllTaskHandler);
 app.delete("/tasks", deleteAllTaskHandler);
 app.put("/tasks/:id/status", updateStatusHandler);
 app.get("/tasks/completed", fetchCompletedStatusHandler);
 app.get("/tasks/pending", fetchPendingStatusHandler);
 app.get("/tasks/:id", viewTaskWithId);
+
+app.get("/authtasks",protectedRouteMiddleware,getLoggedinUserTasks)
 
 // Start the server
 const PORT = process.env.PORT || 3001;
