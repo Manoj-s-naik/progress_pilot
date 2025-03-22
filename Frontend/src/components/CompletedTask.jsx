@@ -8,7 +8,17 @@ function CompletedTask() {
   const fetchCompletedTaskHandler = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:3000/tasks/completed");
+      const response = await fetch(
+        "http://localhost:3000/api/tasks/completed",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      
       // console.log(data.allTask);
       const data = await response.json();
       setTask(data.tasks);
@@ -29,11 +39,19 @@ function CompletedTask() {
           <Loading />
         ) : (
           <div className="flex">
-            <ul className="ml-8 mt-6 ">
-              {task.map((task) => (
-                <li className="gap-3" key={task._id}>{task.taskName}</li>
-              ))}
-            </ul>
+            {task.length === 0 ? (
+              <p className="ml-8 mt-6 text-gray-500">
+                No completed tasks found.
+              </p>
+            ) : (
+              <ul className="ml-8 mt-6 ">
+                {task.map((task) => (
+                  <li className="gap-3" key={task._id}>
+                    {task.taskName}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
       </div>

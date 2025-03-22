@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
     required: [true, "Email is required"],
     unique: true,
     trim: true,
-    match: [/.+@.+\..+/, "Invalid email format"], // Email validation
+    match: [/.+@.+\..+/, "Invalid email format"],
   },
   lastName: {
     type: String,
@@ -23,17 +23,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "Password is required"],
     minlength: [6, "Password must be at least 6 characters"],
-    trim: true,
-  },
-  confirmPassword: {
-    type: String,
-    required: [true, "Confirm Password is required"],
-    validate: {
-      validator: function (value) {
-        return value === this.password;
-      },
-      message: "Passwords do not match",
-    },
     trim: true,
   },
   createdAt: {
@@ -56,15 +45,10 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-
+// Hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-
-
   this.password = await bcrypt.hash(this.password, 10);
-  
- 
-  this.confirmPassword = undefined;
   next();
 });
 

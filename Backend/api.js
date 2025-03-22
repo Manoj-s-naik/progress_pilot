@@ -5,10 +5,7 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const util = require("util");
-const promisify = util.promisify;
 const jwt = require("jsonwebtoken");
-const promisdiedJWTsign = promisify(jwt.sign);
-const promisdiedJWTverify = promisify(jwt.verify);
 const userModel = require("./models/userModel");
 const taskModel = require("./models/taskModel");
 
@@ -16,7 +13,13 @@ dotenv.config({ path: "./.env" });
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -35,12 +38,20 @@ mongoose
 
 const signupHandler = async (req, res) => {
   try {
-    const { email, password, name, lastName } = req.body;
+    const { email, password, name, lastName, confirmPassword } = req.body;
 
-    if (!email || !password || !name || !lastName) {
+    if (!email || !password || !name || !lastName || !confirmPassword) {
       return res.status(400).json({
         status: "failure",
-        message: "Name, email,lastName and password are required",
+        message:
+          "Name, email, lastName, password, and confirmPassword are required",
+      });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        status: "failure",
+        message: "Passwords do not match",
       });
     }
 
@@ -52,14 +63,11 @@ const signupHandler = async (req, res) => {
       });
     }
 
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
+    // No need to manually hash password, `pre("save")` does it
     const newUser = await userModel.create({
       email,
-      password: hashedPassword,
+      password,
       name,
-      confirmPassword: hashedPassword,
       lastName,
     });
 
@@ -88,8 +96,8 @@ const loginHandler = async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({
-        message: "email and password required",
         status: "failure",
+        message: "Email and password are required",
       });
     }
 
@@ -97,7 +105,7 @@ const loginHandler = async (req, res) => {
     if (!user) {
       return res.status(400).json({
         status: "failure",
-        message: "invalid  email  ",
+        message: "Invalid email or password",
       });
     }
 
@@ -115,17 +123,19 @@ const loginHandler = async (req, res) => {
     res.cookie("jwt", authToken, {
       maxAge: 1000 * 60 * 60 * 24,
       httpOnly: true,
-      sameSite: "strict",
+      sameSite: "Lax",
     });
+
     return res.status(200).json({
-      message: "success fully generate the jwt token",
       status: "success",
+      message: "Successfully generated JWT token",
       user: { id: user._id, email: user.email, name: user.name },
     });
   } catch (err) {
+    console.error("Login error:", err);
     return res.status(500).json({
       status: "failure",
-      message: "error on our side",
+      message: "An error occurred on our side",
       error: err.message,
     });
   }
@@ -146,35 +156,12 @@ const protectedRouteMiddleware = async (req, res, next) => {
 
     // Attach user ID to request object
     req.id = decryptedToken.id;
-    console.log("userid", req.id);
 
     next();
   } catch (err) {
     return res.status(500).json({
       message: "Internal server error",
       error: err.message,
-    });
-  }
-};
-
-const profileHandler = async (req, res) => {
-  try {
-    const userId = req.id;
-    const user = await userModel.findById(userId);
-    if (!userId) {
-      return res.status(400).json({
-        message: "there is no profile is there for this id",
-        status: "success",
-      });
-    }
-    return res.status(200).json({
-      message: "profile found",
-      user: user,
-    });
-  } catch (err) {
-    return res.status(500).json({
-      message: "internal error",
-      error: err,
     });
   }
 };
@@ -234,20 +221,27 @@ const getLoggedinUserTasks = async (req, res) => {
     // Fetch all tasks for the logged-in user
     const loggedInUserTasks = await taskModel.find({ userId: loggedInUserId });
 
-    res.status(200).json({
+    if (loggedInUserTasks.length === 0) {
+      // Check for empty array
+      return res.status(404).json({
+        message: "No tasks found",
+        status: "failure",
+      });
+    }
+
+    return res.status(200).json({
       message: "Tasks retrieved successfully",
       status: "success",
       tasks: loggedInUserTasks,
     });
-
   } catch (err) {
     res.status(500).json({
       message: "Internal server error",
+      status: "failure",
       error: err.message,
     });
   }
 };
-
 
 const viewAllTaskHandler = async (req, res) => {
   try {
@@ -346,12 +340,29 @@ const viewTaskWithId = async (req, res) => {
 
 const fetchCompletedStatusHandler = async (req, res) => {
   try {
-    const completedTask = await taskModel.find({ status: "completed" });
+    const loggedInUserId = req.id; // Get user ID from protectedRouteMiddleware
 
-    return res.status(201).json({
-      message: "completed tasks",
+    if (!loggedInUserId) {
+      return res.status(401).json({
+        message: "Authentication required",
+        status: "failure",
+      });
+    }
+
+    // Fetch only the pending tasks for the logged-in user
+    const completedTasks = await taskModel.find({
+      userId: loggedInUserId,
+      status: "completed",
+    });
+
+    if (completedTasks.length === 0) {
+      return res.status(200).json({ tasks: [] });
+    }
+
+    return res.status(200).json({
+      message: "completed tasks fetched successfully",
       status: "success",
-      tasks: completedTask,
+      tasks: completedTasks,
     });
   } catch (error) {
     return res.status(500).json({
@@ -361,14 +372,32 @@ const fetchCompletedStatusHandler = async (req, res) => {
     });
   }
 };
+
 const fetchPendingStatusHandler = async (req, res) => {
   try {
-    const completedTask = await taskModel.find({ status: "pending" });
+    const loggedInUserId = req.id; // Get user ID from protectedRouteMiddleware
 
-    return res.status(201).json({
-      message: "pending tasks fetch successfully",
+    if (!loggedInUserId) {
+      return res.status(401).json({
+        message: "Authentication required",
+        status: "failure",
+      });
+    }
+
+    // Fetch only the pending tasks for the logged-in user
+    const pendingTasks = await taskModel.find({
+      userId: loggedInUserId,
+      status: "pending",
+    });
+
+    if (pendingTasks.length === 0) {
+      return res.status(200).json({ tasks: [] });
+    }
+
+    return res.status(200).json({
+      message: "Pending tasks fetched successfully",
       status: "success",
-      tasks: completedTask,
+      tasks: pendingTasks,
     });
   } catch (error) {
     return res.status(500).json({
@@ -379,23 +408,72 @@ const fetchPendingStatusHandler = async (req, res) => {
   }
 };
 
+const loggedInUserInfoHandler = async (req, res) => {
+  try {
+    const loggedInUserId = req.id;
+    if (!loggedInUserId) {
+      return res.status(400).json({
+        message: "antentication require",
+        status: "failure",
+        error: error.message,
+      });
+    }
+
+    const loggedInUser = await userModel.findById(loggedInUserId);
+    return res.status(200).json({
+      message: "User fetched successfully",
+      status: "success",
+      userInfo: {
+        name: loggedInUser.name,
+        email: loggedInUser.email,
+        score: loggedInUser.score,
+        lastName: loggedInUser.lastName,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal error",
+      status: "failure",
+      error: error.message,
+    });
+  }
+};
 // Public routes
 
-app.post("/sign", signupHandler);
-app.post("/login", loginHandler);
-app.get("/profile", protectedRouteMiddleware, profileHandler);
-app.post("/logout", logoutHandler);
+app.post("/api/auth/sign", signupHandler);
+app.post("/api/auth/login", loginHandler);
+app.post("/api/auth/logout", logoutHandler);
 
 // Task routes
-app.post("/task", protectedRouteMiddleware, createTaskHandler);
-app.get("/tasks", viewAllTaskHandler);
-app.delete("/tasks", deleteAllTaskHandler);
+app.post("/api/task", protectedRouteMiddleware, createTaskHandler);
+app.get(
+  "/api/loggedInUsertasks",
+  protectedRouteMiddleware,
+  getLoggedinUserTasks
+);
+app.get(
+  "/api/tasks/completed",
+  protectedRouteMiddleware,
+  fetchCompletedStatusHandler
+);
+app.get(
+  "/api/tasks/pending",
+  protectedRouteMiddleware,
+  fetchPendingStatusHandler
+);
+
+app.get(
+  "/api/auth/loggedinUser",
+  protectedRouteMiddleware,
+  loggedInUserInfoHandler
+);
+// Routes for checking purpose
 app.put("/tasks/:id/status", updateStatusHandler);
-app.get("/tasks/completed", fetchCompletedStatusHandler);
-app.get("/tasks/pending", fetchPendingStatusHandler);
 app.get("/tasks/:id", viewTaskWithId);
 
-app.get("/authtasks",protectedRouteMiddleware,getLoggedinUserTasks)
+// The routes that for Admin Panel
+app.get("/api/tasks", viewAllTaskHandler);
+app.delete("/tasks", deleteAllTaskHandler);
 
 // Start the server
 const PORT = process.env.PORT || 3001;

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import Loading from "./Loading";
 import { UseTask } from "./TaskContext";
@@ -7,24 +8,39 @@ import completeSign from "./image/completSign.jpeg";
 
 function PendingTask() {
   const [tasks, setTasks] = useState([]);
-  const { fetchTasks, loading, setLoading } = UseTask();
-  const [image,setImage]=useState(pendingSign);
+  const { loading, setLoading } = UseTask();
 
+  // Fetch Pending Tasks
   const fetchPendingTasksHandler = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:3000/tasks/pending");
+      const response = await fetch("http://localhost:3000/api/tasks/pending", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (response.status === 404) {
+        console.warn("No pending tasks found.");
+        setTasks([]);
+        return;
+      }
+      if (!response.ok) throw new Error("Failed to fetch tasks.");
+
       const data = await response.json();
-      // console.log(data.tasks);
       setTasks(data.tasks);
     } catch (error) {
       console.error("Error fetching tasks:", error);
+      alert("Failed to load tasks. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const updateTaskStatus = async (taskId, status) => {
+  // Update Task Status
+  const updateTaskStatus = async (taskId, newStatus) => {
     try {
       const response = await fetch(
         `http://localhost:3000/tasks/${taskId}/status`,
@@ -33,20 +49,21 @@ function PendingTask() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ status }),
+          credentials: "include",
+          body: JSON.stringify({ status: newStatus }),
         }
       );
-      const data = await response.json();
+
       if (response.ok) {
-        // console.log("task status changed" + data.updatedTask.status);
         setTasks((prevTasks) =>
           prevTasks.map((task) =>
-            task._id === taskId ? { ...task, status } : task
+            task._id === taskId
+              ? { ...task, status: newStatus, pendingHidden: newStatus === "completed" }
+              : task
           )
-        )
-        setImage("");
-        ;
+        );
       } else {
+        const data = await response.json();
         alert(data.message);
       }
     } catch (error) {
@@ -69,7 +86,7 @@ function PendingTask() {
             <ul>
               {tasks.map((task) => (
                 <div
-                  className="flex items-center justify-between "
+                  className="flex items-center justify-between"
                   key={task._id}
                 >
                   <Link
@@ -79,14 +96,19 @@ function PendingTask() {
                     {task.taskName}
                   </Link>
                   <div className="flex gap-4 ml-auto mr-5">
-                    <img
-                      src={image}
-                      className="h-[1rem] cursor-pointer"
-                      onClick={() => updateTaskStatus(task._id, "pending")}
-                    />
+                    {/* Show Pending Sign initially and hide it when marked completed */}
+                    {!task.pendingHidden && (
+                      <img
+                        src={pendingSign}
+                        alt="Pending Task"
+                        className="h-[1rem] cursor-pointer"
+                      />
+                    )}
+
+                    {/* Always show Completed Sign */}
                     <img
                       src={completeSign}
-                      alt="Complete"
+                      alt="Complete Task"
                       className="h-[1rem] cursor-pointer"
                       onClick={() => updateTaskStatus(task._id, "completed")}
                     />

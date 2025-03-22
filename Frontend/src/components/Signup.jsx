@@ -50,7 +50,7 @@ const Signup = () => {
     setError(""); // Clear previous errors
 
     try {
-      const response = await fetch("http://localhost:3000/sign", {
+      const response = await fetch("http://localhost:3000/api/auth/sign", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
