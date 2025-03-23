@@ -14,7 +14,7 @@ function PendingTask() {
   const fetchPendingTasksHandler = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:3000/api/tasks/pending", {
+      const response = await fetch("http://localhost:3000/api/task/pending", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -43,7 +43,7 @@ function PendingTask() {
   const updateTaskStatus = async (taskId, newStatus) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/tasks/${taskId}/status`,
+        `http://localhost:3000/api/task/${taskId}/status`,
         {
           method: "PUT",
           headers: {

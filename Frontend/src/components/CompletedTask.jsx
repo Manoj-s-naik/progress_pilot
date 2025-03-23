@@ -9,7 +9,7 @@ function CompletedTask() {
     setLoading(true);
     try {
       const response = await fetch(
-        "http://localhost:3000/api/tasks/completed",
+        "http://localhost:3000/api/task/completed",
         {
           method: "GET",
           headers: {
