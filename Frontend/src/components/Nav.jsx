@@ -7,14 +7,17 @@ function Nav() {
       <Link to="/" className="text-white">
         Dashboard
       </Link>
-      <Link to="/addTask" className="text-white">
-        Add Task
+      <Link to="/personalTaks" className="text-white">
+        Assined Task
       </Link>
       <Link to="/pendingTask" className="text-white">
         Pending Task
       </Link>
       <Link to="/completedTask" className="text-white">
         Completed Task
+      </Link>
+      <Link to="/addTask" className="text-white">
+        Personal Task
       </Link>
     </nav>
   );

@@ -1,7 +1,10 @@
+const { log } = require("console");
 const taskModel = require("../models/taskModel");
+
 const viewAllTaskHandler = async (req, res) => {
   try {
-    const allTask = await taskModel.find();
+    const loggedInUserId = req.id;
+    const allTask = await taskModel.findById(loggedInUserId);
     return res.status(200).json({
       allTask: allTask,
       status: "success",
@@ -16,7 +19,12 @@ const viewAllTaskHandler = async (req, res) => {
 
 const deleteAllTaskHandler = async (req, res) => {
   try {
-    const deleteAllTasks = await taskModel.deleteMany();
+    const loggedInUserId = req.id;
+
+    const deleteAllTasks = await taskModel.deleteMany({
+      userId: loggedInUserId,
+    });
+
     return res.status(200).json({
       message: "all tasks deleted successfully",
       status: "success",

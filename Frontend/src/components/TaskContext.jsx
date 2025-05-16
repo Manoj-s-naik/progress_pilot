@@ -33,7 +33,6 @@ function TaskWrapper({ children }) {
       }
 
       const data = await response.json();
-      console.log("Fetched tasks:", data);
       if (data.tasks.length === 0) {
         console.warn("no task found");
         setTasks([]);

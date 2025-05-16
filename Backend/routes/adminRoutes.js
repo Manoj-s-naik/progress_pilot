@@ -1,15 +1,10 @@
 const express = require("express");
-
-const {
-  viewAllTaskHandler,
-  deleteAllTaskHandler,
-  viewTaskWithId,
-} = require("../controllers/adminContoller");
+const {protectedRouteMiddleware} = require("../middleware/authenticateMiddleware");
+const {viewAllTaskHandler,deleteAllTaskHandler} = require("../controllers/adminContoller");
 
 const router = express.Router();
 
-router.get("/tasks", viewAllTaskHandler);
-router.delete("/tasks", deleteAllTaskHandler);
-router.get("/tasks/:id", viewTaskWithId);
+router.get("/tasks", protectedRouteMiddleware, viewAllTaskHandler);
+router.delete("/tasks", protectedRouteMiddleware, deleteAllTaskHandler);
 
 module.exports = router;
