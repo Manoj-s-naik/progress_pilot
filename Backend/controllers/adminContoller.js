@@ -1,5 +1,6 @@
-const { log } = require("console");
+const ProjectModel = require("../models/projectModel"); // adjust the path to your model
 const taskModel = require("../models/taskModel");
+const userModel = require("../models/userModel");
 
 const viewAllTaskHandler = async (req, res) => {
   try {
@@ -38,33 +39,53 @@ const deleteAllTaskHandler = async (req, res) => {
   }
 };
 
-const viewTaskWithId = async (req, res) => {
+const getAllEmployees = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        message: "Invalid task ID format",
-      });
-    }
-
-    const task = await taskModel.findById(id);
-
-    if (!task) {
-      return res.status(404).json({
-        message: "Task not found",
-      });
-    }
-    return res.status(200).json({
-      task: task,
-      status: "success",
+    const allEmployeesName = await userModel.find({role :"user"}).select("name");
+    return res.status(201).json({
+      user: allEmployeesName,
+      message : "employe details fetched successfully",
+      status : "success"
     });
   } catch (error) {
-    return res.status(500).json({
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+const getAllEmployeesCount = async (req, res) => {
+  try {
+    const allEmployeesName = await userModel.countDocuments();
+    return res.status(201).json({
+      employeesCount: allEmployeesName,
+      message : "employee counts fetched successfully",
+      status : "success"
+    });
+  } catch (error) {
+    res.status(500).json({
       message: "Internal server error",
       error: error.message,
     });
   }
 };
 
-module.exports = { viewAllTaskHandler, deleteAllTaskHandler, viewTaskWithId };
+const getAllProjectCount = async (req, res) => {
+  try {
+    const count = await ProjectModel.countDocuments();
+    res.status(200).json({
+      status: "success",
+      count,
+      message: "Total project count fetched successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Failed to fetch project count",
+      error: error.message
+    });
+  }
+};
+
+
+module.exports = { viewAllTaskHandler, deleteAllTaskHandler, getAllEmployees, getAllEmployeesCount,getAllProjectCount};
