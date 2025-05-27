@@ -5,9 +5,9 @@ function ProtectedRoute({ children }) {
   const { login } = useAuth();
   console.log("login state in protected route", login);
 
-  if (!login) {
-    return <Navigate to="/login" />;
-  }
+  // if (!login) {
+  //   return <Navigate to="/login" />;
+  // }
 
   return children;
 }

@@ -4,8 +4,7 @@ const userModel = require("../models/userModel");
 
 const viewAllTaskHandler = async (req, res) => {
   try {
-    const loggedInUserId = req.id;
-    const allTask = await taskModel.findById(loggedInUserId);
+    const allTask = await taskModel.find();
     return res.status(200).json({
       allTask: allTask,
       status: "success",
@@ -20,11 +19,7 @@ const viewAllTaskHandler = async (req, res) => {
 
 const deleteAllTaskHandler = async (req, res) => {
   try {
-    const loggedInUserId = req.id;
-
-    const deleteAllTasks = await taskModel.deleteMany({
-      userId: loggedInUserId,
-    });
+    const deleteAllTasks = await taskModel.deleteMany();
 
     return res.status(200).json({
       message: "all tasks deleted successfully",
@@ -41,11 +36,13 @@ const deleteAllTaskHandler = async (req, res) => {
 
 const getAllEmployees = async (req, res) => {
   try {
-    const allEmployeesName = await userModel.find({role :"user"}).select("name");
+    const allEmployeesName = await userModel
+      .find({ role: "user" })
+      .select("name");
     return res.status(201).json({
       user: allEmployeesName,
-      message : "employe details fetched successfully",
-      status : "success"
+      message: "employe details fetched successfully",
+      status: "success",
     });
   } catch (error) {
     res.status(500).json({
@@ -59,8 +56,8 @@ const getAllEmployeesCount = async (req, res) => {
     const allEmployeesName = await userModel.countDocuments();
     return res.status(201).json({
       employeesCount: allEmployeesName,
-      message : "employee counts fetched successfully",
-      status : "success"
+      message: "employee counts fetched successfully",
+      status: "success",
     });
   } catch (error) {
     res.status(500).json({
@@ -76,13 +73,13 @@ const getAllProjectCount = async (req, res) => {
     res.status(200).json({
       status: "success",
       count,
-      message: "Total project count fetched successfully"
+      message: "Total project count fetched successfully",
     });
   } catch (error) {
     res.status(500).json({
       status: "error",
       message: "Failed to fetch project count",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -120,4 +117,11 @@ const createTaskHandler = async (req, res) => {
   }
 };
 
-module.exports = { viewAllTaskHandler, deleteAllTaskHandler, getAllEmployees, getAllEmployeesCount,getAllProjectCount,createTaskHandler};
+module.exports = {
+  viewAllTaskHandler,
+  deleteAllTaskHandler,
+  getAllEmployees,
+  getAllEmployeesCount,
+  getAllProjectCount,
+  createTaskHandler,
+};

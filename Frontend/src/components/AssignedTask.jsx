@@ -1,67 +1,108 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import Loading from "./Loading";
 
 function AssignedTask() {
   const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState();
 
-  // Dummy data
+  const assignedTaskFetcher = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        "http://localhost:3000/api/task/loggedInUsertasks",
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      setTasks(data.tasks);
+    } catch (error) {
+      console.log("Error while fetching tasks:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const dummyTasks = [
-      {
-        id: 1,
-        projectName: "Website Redesign",
-        assignedBy: "Manager A",
-        assignedDate: "2025-05-01",
-        deadline: "2025-05-30",
-        priority: "High",
-        resources: "Figma, Trello, API Docs",
-      },
-      {
-        id: 2,
-        projectName: "Mobile App Testing",
-        assignedBy: "Manager B",
-        assignedDate: "2025-05-10",
-        deadline: "2025-05-25",
-        priority: "Medium",
-        resources: "Test Cases, Device Farm",
-      },
-      {
-        id: 3,
-        projectName: "Backend API Integration",
-        assignedBy: "Manager C",
-        assignedDate: "2025-05-15",
-        deadline: "2025-06-05",
-        priority: "Critical",
-        resources: "Postman, API Docs, MongoDB",
-      },
-    ];
-
-    setTasks(dummyTasks);
+    assignedTaskFetcher();
   }, []);
 
   return (
-    <>
-      <div className="fixed flex items-center justify-center w-full h-[2.5rem] bg-blue-600 text-white text-lg font-semibold">
-        Target Tasks
-      </div>
+    <div>
+      {loading ? (
+        <Loading />
+      ) : (
+        <div className="p-6">
+          <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800">
+            Assigned Tasks
+          </h2>
 
-      <div className="mt-[3rem] p-4 overflow-auto">
-        <ul className="space-y-4">
-          {tasks.map((task) => (
-            <li key={task.id} className="p-4 border rounded-lg shadow-md bg-white">
-              <h2 className="text-xl font-bold text-blue-700">{task.projectName}</h2>
-              <p><strong>Assigned By:</strong> {task.assignedBy}</p>
-              <p><strong>Assigned On:</strong> {task.assignedDate}</p>
-              <p><strong>Deadline:</strong> {task.deadline}</p>
-              <p><strong>Priority:</strong> <span className={`font-semibold ${task.priority === "High" ? "text-red-500" : task.priority === "Medium" ? "text-yellow-500" : "text-green-600"}`}>{task.priority}</span></p>
-              <p><strong>Resources:</strong> {task.resources}</p>
-              <button className="mt-2 px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition">
-                Update Progress
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </>
+          {tasks.length === 0 ? (
+            <p className="text-center text-gray-500">No tasks found</p>
+          ) : (
+            <div className="overflow-x-auto rounded-lg shadow">
+              <table className="min-w-full bg-white border border-gray-200">
+                <thead className="bg-gray-100 text-gray-700">
+                  <tr>
+                    <th className="py-2 px-4 border">Sl. No</th>
+                    <th className="py-2 px-4 border">Task Name</th>
+                    <th className="py-2 px-4 border">Assigned By</th>
+                    <th className="py-2 px-4 border">Assigned Date</th>
+                    <th className="py-2 px-4 border">Deadline</th>
+                    <th className="py-2 px-4 border">Priority</th>
+                    <th className="py-2 px-4 border">Project</th>
+                    <th className="py-2 px-4 border">Resources</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tasks.map((task, index) => (
+                    <tr
+                      key={index}
+                      className="text-center hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="py-2 px-4 border">{index + 1}</td>
+                      <td className="py-2 px-4 border">{task.taskName}</td>
+                      <td className="py-2 px-4 border">{task.assignedBy}</td>
+                      <td className="py-2 px-4 border">
+                        {new Date(task.assignedDate).toLocaleDateString()}
+                      </td>
+                      <td className="py-2 px-4 border">
+                        {new Date(task.deadLine).toLocaleDateString()}
+                      </td>
+                      <td className="py-2 px-4 border capitalize">
+                        <span
+                          className={`inline-block px-2 py-1 rounded-full text-sm font-medium ${
+                            task.priorityLevel === "easy"
+                              ? "bg-green-100 text-green-700"
+                              : task.priorityLevel === "medium"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
+                          {task.priorityLevel}
+                        </span>
+                      </td>
+                      <td className="py-2 px-4 border">{task.projectName}</td>
+                      <td className="py-2 px-4 border">
+                        <a
+                          href={`http://localhost:3000/${task.resources}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          View
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
