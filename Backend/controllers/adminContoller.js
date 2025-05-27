@@ -87,5 +87,37 @@ const getAllProjectCount = async (req, res) => {
   }
 };
 
+const createTaskHandler = async (req, res) => {
+  try {
+    const {
+      taskName,
+      projectName,
+      priorityLevel,
+      userId,
+      deadLine,
+      assignedBy,
+      resources,
+    } = req.body;
 
-module.exports = { viewAllTaskHandler, deleteAllTaskHandler, getAllEmployees, getAllEmployeesCount,getAllProjectCount};
+    const filePath = req.file ? req.file.path : null;
+
+    const task = await taskModel.create({
+      taskName,
+      projectName,
+      priorityLevel,
+      userId,
+      deadLine,
+      assignedBy,
+      resources: filePath,
+    });
+    res.status(201).json({
+      message: "Task created successfully",
+      data: task,
+    });
+  } catch (err) {
+    console.error("Error creating task:", err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = { viewAllTaskHandler, deleteAllTaskHandler, getAllEmployees, getAllEmployeesCount,getAllProjectCount,createTaskHandler};

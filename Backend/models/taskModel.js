@@ -45,16 +45,21 @@ const taskSchema = new mongoose.Schema({
     enum: ["hard", "medium", "easy"],
     // required: true
   },
-resources: [
-  {
-    title: String,
-    description: String,
-    pdfUrl: {
-      type: String,
-      required: true,
-    },
-  },
-],
+// resources: [
+//   {
+//     title: String,
+//     description: String,
+//     pdfUrl: {
+//       type: String,
+//       required: true,
+//     },
+//   },
+// ],
+resources: {
+  type: String, 
+  required: false,
+}
+
 });
 
 taskSchema.pre("save", function (next) {
