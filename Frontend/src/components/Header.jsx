@@ -1,14 +1,36 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import logo from "./image/logo.jpeg";
 import { CircleUserRound } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "./AuthContext";
+import { use } from "react";
 function Header() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const { logoutHandler } = useAuth();
   const profilePopUpHandler = () => {
     setIsSidebarOpen((prevState) => !prevState);
   };
+  const profileInfoHandler = async () => {
+    try {
+      const respons = await fetch(
+        "http://localhost:3000/api/task/auth/loggedinUser",
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      const data = await respons.json();
+      setUser(data.userInfo);
+      console.log("data from header", data.userInfo);
+    } catch (error) {
+      console.log("error while fetching user information", error.message);
+    }
+  };
+
+  useEffect(() => {
+    profileInfoHandler();
+  }, []);
 
   return (
     <div>
@@ -49,9 +71,15 @@ function Header() {
                   src={logo}
                   alt="user image"
                 />
-                <h4>Manoj s naik</h4>
-                <div>To be became unreplaceable</div>
-                <h3>Score :100%</h3>
+                {user ? (
+                  <>
+                    <h4>{user.name}{user.lastName}</h4>
+                    <div>{user.lastName}</div>
+                    <h3>{user.score}</h3>
+                  </>
+                ) : (
+                  <p>Loading user information</p>
+                )}
                 <button
                   onClick={logoutHandler}
                   className="bg-blue-600 p-2 w-[6rem] rounded-lg"
