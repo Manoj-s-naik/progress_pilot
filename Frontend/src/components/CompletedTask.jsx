@@ -17,7 +17,7 @@ function CompletedTask() {
       });
 
       const data = await response.json();
-      console.log("data", data);
+      console.log("data from completedtask page", data.tasks);
 
       setTask(data.tasks);
     } catch (error) {
@@ -30,58 +30,6 @@ function CompletedTask() {
     fetchCompletedTaskHandler();
   }, []);
   return (
-    // <>
-    //   <div>
-    //     {loading ? (
-    //       <Loading />
-    //     ) : (
-    //       <div className="flex">
-    //         {task.length === 0 ? (
-    //           <p className="ml-8 mt-6 text-gray-500">
-    //             No completed tasks found.
-    //           </p>
-    //         ) : (
-    //           <div>
-    //             <ul className="ml-8 mt-6 bg-red-500">
-    //               <div className="">
-    //                 <table>
-    //                   <thead>
-    //                     <tr>
-    //                       <th>Sl no</th>
-    //                       <th>Task Name</th>
-    //                       <th>Time deadline</th>
-    //                       <th>Time Taken</th>
-    //                     </tr>
-    //                   </thead>
-    //                   <tbody>
-    //                     <tr>
-    //                       <td>check 1</td>
-    //                       <td>
-    //                         {task.map((task) => (
-    //                           <li className="gap-3" key={task._id}>
-    //                             {task.taskName}
-    //                           </li>
-    //                         ))}
-    //                       </td>
-    //                       <td>18-05-2025</td>
-    //                       <td> 21 Hours</td>
-    //                     </tr>
-    //                   </tbody>
-    //                 </table>
-    //                 {/* {task.map((task) => (
-    //                   <li className="gap-3" key={task._id}>
-    //                     {task.taskName}
-    //                   </li>
-    //                 ))} */}
-    //               </div>
-    //             </ul>
-    //           </div>
-    //         )}
-    //       </div>
-    //     )}
-    //   </div>
-    // </>
-
     <>
       <div>
         {loading ? (
@@ -98,38 +46,34 @@ function CompletedTask() {
                   <thead className="bg-gray-100 text-gray-700 uppercase">
                     <tr>
                       <th className="px-4 py-2 border">Sl No</th>
+                      <th className="px-4 py-2 border">Project Name</th>
                       <th className="px-4 py-2 border">Task Name</th>
-                      <th className="px-4 py-2 border">Task Assigned</th>
+                      <th className="px-4 py-2 border">Task Assigned By</th>
+                      <th className="px-4 py-2 border">Task Assigned Date</th>
                       <th className="px-4 py-2 border">Deadline</th>
+                      <th className="px-4 py-2 border">Completed Date</th>
                       <th className="px-4 py-2 border">Time Taken</th>
-                      <th className="px-4 py-2 border">Update Issue</th>
                     </tr>
                   </thead>
                   <tbody>
                     {task.map((task, index) => (
                       <tr key={task._id} className="hover:bg-gray-50">
                         <td className="px-4 py-2 border">{index + 1}</td>
+                        <td className="px-4 py-2 border">{task.projectName}</td>
                         <td className="px-4 py-2 border">{task.taskName}</td>
+                        <td className="px-4 py-2 border">{task.assignedBy}</td>
                         <td className="px-4 py-2 border">
-                          {task.assigned
-                            ? new Date(task.assigned).toLocaleTimeString(
-                                "en-US",
-                                {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                  hour12: true,
-                                }
-                              )
-                            : "N/A"}
+                          {new Date(task.assignedDate).toLocaleDateString()}
                         </td>
                         <td className="px-4 py-2 border">
-                          {task.deadLine || "N/A"}
+                          {new Date(task.deadLine).toLocaleDateString() ||
+                            "N/A"}
+                        </td>
+                        <td className="px-4 py-2 border">
+                          {task.completedAt || "null"}
                         </td>
                         <td className="px-4 py-2 border">
                           {task.timeTaken || "N/A"}
-                        </td>
-                        <td className="px-4 py-2 border">
-                          {task.UpdateIssue || "N/A"}
                         </td>
                       </tr>
                     ))}

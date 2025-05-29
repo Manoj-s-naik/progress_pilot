@@ -46,6 +46,7 @@ function AssignedTask() {
                 <thead className="bg-gray-100 text-gray-700">
                   <tr>
                     <th className="py-2 px-4 border">Sl. No</th>
+                    <th className="py-2 px-4 border">Project Name</th>
                     <th className="py-2 px-4 border">Task Name</th>
                     <th className="py-2 px-4 border">Assigned By</th>
                     <th className="py-2 px-4 border">Assigned Date</th>
@@ -62,6 +63,7 @@ function AssignedTask() {
                       className="text-center hover:bg-gray-50 transition-colors"
                     >
                       <td className="py-2 px-4 border">{index + 1}</td>
+                      <td className="py-2 px-4 border">{task.projectName}</td>
                       <td className="py-2 px-4 border">{task.taskName}</td>
                       <td className="py-2 px-4 border">{task.assignedBy}</td>
                       <td className="py-2 px-4 border">

@@ -30,6 +30,7 @@ function PendingTask() {
 
       const data = await response.json();
       setTasks(data.tasks);
+      console.log("data pending", data.tasks);
     } catch (error) {
       console.error("Error fetching tasks:", error);
       alert("Failed to load tasks. Please try again.");
@@ -80,109 +81,72 @@ function PendingTask() {
   }, []);
 
   return (
-    // <div>
-    //   {loading ? (
-    //     <Loading />
-    //   ) : (
-    //     <div>
-    //       {tasks.length > 0 ? (
-    //         <ul>
-    //           {tasks.map((task) => (
-    //             <li
-    //               className="flex items-center justify-between"
-    //               key={task._id}
-    //             >
-    //               <Link
-    //                 to={`/tasks/${task._id}`}
-    //                 className="flex-grow ml-7 pt-2 py-3"
-    //               >
-    //                 {task.taskName}
-    //               </Link>
-    //               <div className="flex gap-4 ml-auto mr-5">
-    //                 {/* Show Pending Sign initially and hide it when marked completed */}
-    //                 {!task.pendingHidden && (
-    //                   <img
-    //                     src={pendingSign}
-    //                     alt="Pending Task"
-    //                     className="h-[1rem] cursor-pointer"
-    //                   />
-    //                 )}
+    <>
+      <div>
+        {loading ? (
+          <Loading />
+        ) : (
+          <>
+            <div>
+              <h1 className="text-2xl font-semibold mb-4 text-center text-gray-800">
+                Pending tasks
+              </h1>
+            </div>
+            <table className="ml-8 mt-6 overflow-x-auto w-full">
+              <thead className="min-w-full border border-gray-300 text-sm text-left">
+                <tr>
+                  <th className="px-4 py-2 border">Sl no</th>
+                  <th className="px-4 py-2 border">Task Name</th>
+                  <th className="px-4 py-2 border">Project Name</th>
+                  <th className="px-4 py-2 border">Task Assigned By</th>
+                  <th className="px-4 py-2 border">Task Assigned Date</th>
+                  <th className="px-4 py-2 border">Deadline</th>
+                  <th className="px-4 py-2 border">Update Issue</th>
+                  <th className="px-4 py-2 border">Pending</th>
+                  <th className="px-4 py-2 border">Completed</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tasks.map((task, index) => (
+                  <tr key={task._id}>
+                    <td className="px-4 py-2 border">{index + 1}</td>
+                    <td className="px-4 py-2 border">{task.projectName}</td>
+                    <td className="px-4 py-2 border">{task.taskName}</td>
+                    <td className="px-4 py-2 border">{task.assignedBy}</td>
+                    <td className="px-4 py-2 border">
+                      {new Date(task.assignedDate).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-2 border">
+                      {new Date(task.deadLine).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-2 border text-center">issue </td>
+                    <td className="px-4 py-2 border text-center">
+                      {!task.pendingHidden && (
+                        <img
+                          src={pendingSign}
+                          alt="Pending Task"
+                          className="h-[1rem] cursor-default inline-block"
+                        />
+                      )}
+                    </td>
 
-    //                 {/* Always show Completed Sign */}
-    //                 <img
-    //                   src={completeSign}
-    //                   alt="Complete Task"
-    //                   className="h-[1rem] cursor-pointer"
-    //                   onClick={() => updateTaskStatus(task._id, "completed")}
-    //                 />
-    //               </div>
-    //             </li>
-    //           ))}
-    //         </ul>
-    //       ) : (
-    //         <p className="text-center mt-6">No tasks available.</p>
-    //       )}
-    //     </div>
-    //   )}
-    // </div>
-
-    <div>
-      {loading ? (
-        <Loading />
-      ) : (
-        <table className="ml-8 mt-6 overflow-x-auto w-full">
-          <thead className="min-w-full border border-gray-300 text-sm text-left">
-            <tr>
-              <th className="px-4 py-2 border">Sl no</th>
-              <th className="px-4 py-2 border">Task Name</th>
-              <th className="px-4 py-2 border">Task Assigned</th>
-              <th className="px-4 py-2 border">Deadline</th>
-              <th className="px-4 py-2 border">Pending</th>
-              <th className="px-4 py-2 border">Completed</th>
-              <th className="px-4 py-2 border">Update Issue</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tasks.map((task, index) => (
-              <tr key={task._id}>
-                <td className="px-4 py-2 border">{index + 1}</td>
-                <td className="px-4 py-2 border">{task.taskName}</td>
-                <td className="px-4 py-2 border">{task.deadLine}</td>
-                <td className="px-4 py-2 border">
-                  {task.assigned
-                    ? new Date(task.assigned).toLocaleTimeString("en-US", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true,
-                      })
-                    : "N/A"}
-                </td>
-                <td className="px-4 py-2 border text-center">
-                  {!task.pendingHidden && (
-                    <img
-                      src={pendingSign}
-                      alt="Pending Task"
-                      className="h-[1rem] cursor-default inline-block"
-                    />
-                  )}
-                </td>
-
-                {/* Completed icon – always shown */}
-                <td className="px-4 py-2 border text-center">
-                  <img
-                    src={completeSign}
-                    alt="Complete Task"
-                    className="h-[1rem] cursor-pointer inline-block"
-                    onClick={() => updateTaskStatus(task._id, "completed")}
-                  />
-                </td>
-                <td>issue </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+                    {/* Completed icon – always shown */}
+                    <td className="px-4 py-2 border text-center">
+                      <img
+                        src={completeSign}
+                        alt="Complete Task"
+                        className="h-[1rem] cursor-pointer inline-block"
+                        onClick={() => updateTaskStatus(task._id, "completed")}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
+      </div>
+    </>
   );
 }
 

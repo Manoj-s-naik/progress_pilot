@@ -1,19 +1,39 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 
 function Dashboard() {
   const { progressScore, setprogressScore } = useAuth();
 
+  const progressScorePercentageHandler = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:3000/api/task/completionPercentage",
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      setprogressScore(data.percentage);
+    } catch (error) {
+      console.log("error while fetching progress score");
+    }
+  };
+
   const handleRangeChange = (e) => {
     setprogressScore(Number(e.target.value));
   };
+
+  useEffect(() => {
+    progressScorePercentageHandler();
+  }, []);
 
   return (
     <>
       <div className="flex h-full  items-center justify-center">
         <div className="sm:h-[300px] sm:w-[300px] lg:h-[400px] lg:w-[400px]  border-[2px] shadow-lg ">
           <img
-            src="src\components\image\logo2.jpg"
+            src="src/components/image/logo2.jpg"
             alt="boy image"
             className="w-full"
           />
@@ -22,7 +42,7 @@ function Dashboard() {
               className="w-full"
               min="0"
               max="100"
-              value={progressScore}
+              value={progressScore ?? 0}
               onChange={handleRangeChange}
               type="range"
               name=""

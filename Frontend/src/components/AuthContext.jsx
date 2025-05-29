@@ -9,7 +9,8 @@ export function useAuth() {
 function AuthWrapper({ children }) {
   const [login, setLogin] = useState(false);
 
-  const [progressScore, setprogressScore] = useState(100);
+  const [progressScore, setprogressScore] = useState(0);
+
   const loginHandler = async (email, password) => {
     try {
       const response = await fetch("http://localhost:3000/api/auth/login", {
@@ -33,7 +34,7 @@ function AuthWrapper({ children }) {
       const response = await fetch("http://localhost:3000/api/auth/logout", {
         method: "POST",
       });
-      const data = response.json();
+      const data =await response.json();
       setLogin(false);
     } catch (err) {
       console.log(err.message);
