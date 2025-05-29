@@ -31,7 +31,6 @@ const taskSchema = new mongoose.Schema({
 
   projectName: {
     type: String,
-    // required: true,
   },
   assignedBy: {
     type: String,
@@ -43,7 +42,6 @@ const taskSchema = new mongoose.Schema({
   priorityLevel: {
     type: String,
     enum: ["hard", "medium", "easy"],
-    // required: true
   },
 // resources: [
 //   {

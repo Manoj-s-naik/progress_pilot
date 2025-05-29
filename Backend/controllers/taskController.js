@@ -1,4 +1,5 @@
 const taskModel = require("../models/taskModel");
+const userModel = require("../models/userModel");
 const mongoose = require("mongoose");
 
 const createTaskHandler = async (req, res) => {
@@ -106,10 +107,14 @@ const fetchCompletedStatusHandler = async (req, res) => {
       });
     }
 
-    const completedTasks = await taskModel.find({
-      userId: loggedInUserId,
-      status: "completed",
-    });
+    const completedTasks = await taskModel
+      .find({
+        userId: loggedInUserId,
+        status: "completed",
+      })
+      .select(
+        "projectName taskName timeTaken completedAt deadLine assignedBy assignedDate"
+      );
 
     if (completedTasks.length === 0) {
       return res.status(200).json({ tasks: [] });
@@ -140,10 +145,12 @@ const fetchPendingStatusHandler = async (req, res) => {
       });
     }
 
-    const pendingTasks = await taskModel.find({
-      userId: loggedInUserId,
-      status: "pending",
-    });
+    const pendingTasks = await taskModel
+      .find({
+        userId: loggedInUserId,
+        status: "pending",
+      })
+      .select("taskName projectName status deadLine assignedDate assignedBy"); // 👈 only selected fields
 
     if (pendingTasks.length === 0) {
       return res.status(200).json({ tasks: [] });
@@ -194,6 +201,149 @@ const loggedInUserInfoHandler = async (req, res) => {
   }
 };
 
+const PendingTaskCountHandler = async (req, res) => {
+  try {
+    const loggedInUserId = req.id;
+
+    if (!loggedInUserId) {
+      return res.status(401).json({
+        message: "Authentication required",
+        status: "failure",
+      });
+    }
+
+    const pendingTasksCount = await taskModel.countDocuments({
+      userId: loggedInUserId,
+      status: "pending",
+    });
+
+    if (pendingTasksCount.length === 0) {
+      return res.status(200).json({ tasks: [] });
+    }
+
+    return res.status(200).json({
+      message: "Pending tasks count fetched successfully",
+      status: "success",
+      tasksCount: pendingTasksCount,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal error",
+      status: "failure",
+      error: error.message,
+    });
+  }
+};
+
+const CompletedTaskCountHandler = async (req, res) => {
+  try {
+    const loggedInUserId = req.id;
+
+    if (!loggedInUserId) {
+      return res.status(401).json({
+        message: "Authentication required",
+        status: "failure",
+      });
+    }
+
+    const completedTasksCount = await taskModel.countDocuments({
+      userId: loggedInUserId,
+      status: "completed",
+    });
+
+    if (completedTasksCount === 0) {
+      return res.status(200).json({ message: "no tasks found" });
+    }
+    return res.status(200).json({
+      message: "completed tasks fetched successfully",
+      status: "success",
+      tasksCount: completedTasksCount,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal error",
+      status: "failure",
+      error: error.message,
+    });
+  }
+};
+
+const getLoggedinUserTasksCount = async (req, res) => {
+  try {
+    const loggedInUserId = req.id;
+
+    if (!loggedInUserId) {
+      return res.status(401).json({
+        message: "Authentication required",
+        status: "failure",
+      });
+    }
+
+    const loggedInUserTasksCount = await taskModel.countDocuments({
+      userId: loggedInUserId,
+    });
+
+    if (loggedInUserTasksCount === 0) {
+      return res.status(404).json({
+        message: "No tasks found",
+        status: "failure",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Tasks retrieved successfully",
+      status: "success",
+      totalTasks: loggedInUserTasksCount,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Internal server error",
+      status: "failure",
+      error: err.message,
+    });
+  }
+};
+
+const TaskCompletionPercentageHandler = async (req, res) => {
+  try {
+    const loggedInUserId = req.id;
+
+    if (!loggedInUserId) {
+      return res.status(401).json({
+        message: "Authentication required",
+        status: "failure",
+      });
+    }
+
+    const totalTasks = await taskModel.countDocuments({
+      userId: loggedInUserId,
+    });
+    const completedTasks = await taskModel.countDocuments({
+      userId: loggedInUserId,
+      status: "completed",
+    });
+
+    const completionPercentage =
+      totalTasks === 0
+        ? 0
+        : Math.min(Math.round((completedTasks / totalTasks) * 100), 100);
+
+    return res.status(200).json({
+      message: "Task completion percentage fetched successfully",
+      status: "success",
+      percentage: completionPercentage,
+      totalTasks,
+      completedTasks,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+      status: "failure",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   createTaskHandler,
   getLoggedinUserTasks,
@@ -201,4 +351,6 @@ module.exports = {
   fetchCompletedStatusHandler,
   fetchPendingStatusHandler,
   loggedInUserInfoHandler,
+  getLoggedinUserTasksCount,
+  TaskCompletionPercentageHandler,
 };
