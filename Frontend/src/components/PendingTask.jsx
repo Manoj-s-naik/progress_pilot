@@ -82,6 +82,8 @@ function PendingTask() {
 
   return (
     <>
+    <div>
+      {tasks.length === 0 ?(<p className="ml-8 mt-6 text-gray-500">No task found</p>):(
       <div>
         {loading ? (
           <Loading />
@@ -146,6 +148,9 @@ function PendingTask() {
           </>
         )}
       </div>
+      ) }
+    </div>
+
     </>
   );
 }

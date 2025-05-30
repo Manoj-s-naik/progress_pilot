@@ -1,10 +1,9 @@
 
-const ProjectModel = require("../models/projectModel"); // adjust path
+const ProjectModel = require("../models/projectModel");
 
 const projectCreateHandler = async (req, res) => {
   try {
     const { name, description, status, startDate, endDate, assignedUsers, tasks } = req.body;
-    // Optional: Validate name presence
     if (!name) {
       return res.status(400).json({ message: "Project name is required" });
     }

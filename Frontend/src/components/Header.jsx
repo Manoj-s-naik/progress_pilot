@@ -3,11 +3,11 @@ import logo from "./image/logo.jpeg";
 import { CircleUserRound } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "./AuthContext";
-import { use } from "react";
+
 function Header() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const { logoutHandler } = useAuth();
+  const { logoutHandler, progressScore, setprogressScore } = useAuth();
   const profilePopUpHandler = () => {
     setIsSidebarOpen((prevState) => !prevState);
   };
@@ -75,7 +75,6 @@ function Header() {
                   <>
                     <h4>{user.name}{user.lastName}</h4>
                     <div>{user.lastName}</div>
-                    <h3>{user.score}</h3>
                   </>
                 ) : (
                   <p>Loading user information</p>

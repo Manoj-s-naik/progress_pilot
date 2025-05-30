@@ -69,10 +69,12 @@ const getAllEmployeesCount = async (req, res) => {
 
 const getAllProjectCount = async (req, res) => {
   try {
+    const projectNames = await ProjectModel.find();
     const count = await ProjectModel.countDocuments();
     res.status(200).json({
       status: "success",
-      count,
+      "projectNames" :projectNames,
+      "count": count,
       message: "Total project count fetched successfully",
     });
   } catch (error) {

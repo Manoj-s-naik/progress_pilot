@@ -203,17 +203,7 @@ const loggedInUserInfoHandler = async (req, res) => {
 
 const PendingTaskCountHandler = async (req, res) => {
   try {
-    const loggedInUserId = req.id;
-
-    if (!loggedInUserId) {
-      return res.status(401).json({
-        message: "Authentication required",
-        status: "failure",
-      });
-    }
-
     const pendingTasksCount = await taskModel.countDocuments({
-      userId: loggedInUserId,
       status: "pending",
     });
 
@@ -237,17 +227,7 @@ const PendingTaskCountHandler = async (req, res) => {
 
 const CompletedTaskCountHandler = async (req, res) => {
   try {
-    const loggedInUserId = req.id;
-
-    if (!loggedInUserId) {
-      return res.status(401).json({
-        message: "Authentication required",
-        status: "failure",
-      });
-    }
-
     const completedTasksCount = await taskModel.countDocuments({
-      userId: loggedInUserId,
       status: "completed",
     });
 
@@ -352,5 +332,7 @@ module.exports = {
   fetchPendingStatusHandler,
   loggedInUserInfoHandler,
   getLoggedinUserTasksCount,
+  PendingTaskCountHandler,
+  CompletedTaskCountHandler,
   TaskCompletionPercentageHandler,
 };
